@@ -8,13 +8,14 @@ if (!data) throw new Error(`Unable to find your tokens.`);
 const tokensAndSpamIds = data.split(/\s+/);
 config.tokens = [];
 
-for (let i = 0; i < tokensAndSpamIds.length; i += 2) {
+for (let i = 0; i < tokensAndSpamIds.length; i += 3) {
   if (tokensAndSpamIds[i + 1]) {
     const token = tokensAndSpamIds[i].trim();
     const spamId = tokensAndSpamIds[i + 1].trim();
+    const spamId1 = tokensAndSpamIds[i + 2].trim();
 
-    if (token && spamId) {
-      config.tokens.push({ token, spamId });
+    if (token && spamId && spamId1) {
+      config.tokens.push({ token, spamId, spamId1 });
     }
   }
 }
@@ -27,7 +28,7 @@ app.listen(20040, async () => {
   console.log(`Server Status: ONLINE`);
 });
 
-async function Login(token, Client, spamId) {
+async function Login(token, Client, spamId, spamId1) {
   if (!token) console.log(`You must specify a (valid) token. ${token} is invalid.`);
   if (!spamId) console.log(`You must specify a (valid) spam ID for your ${token}`);
 
@@ -41,19 +42,22 @@ async function Login(token, Client, spamId) {
     async function interval(intervals) {
       const randomDigits = Array(7).fill().map(() => Math.floor(Math.random() * 10));
       const message = randomDigits.join('') + randomDigits.join('') + randomDigits.join('');
-
+      
       await spamChannel.send(message);
+      await spamChannel1.send(message);
     }
 
     const spamChannel = client.channels.cache.get(spamId);
+    await sleep(1000)
+    const spamChannel1 = client.channels.cache.get(spamId1);
     if (spamChannel.size === 0) throw new Error(`Couldn't find a channel called 'spam' in the server for ${client.user.username}. Please create one.`);
 
-    let intervals = 3500
-    setInterval(() => interval(3500), 3500);
+    intervals = 4000
+    setInterval(() => interval(intervals), intervals);
 
     setInterval(() => {
-      intervals = 35000
-    }, 15000);
+      intervals = 4000
+    }, 30000);
   });
 
   client.on('messageCreate', async (message) => {
